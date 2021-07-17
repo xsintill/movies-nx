@@ -59,5 +59,15 @@
     "ts-jest": "27.0.3",
     "ts-node": "~9.1.1",
     "typescript": "~4.2.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,json,css,scss,md,ts,html,graphql,svelte,tsx,jsx}": [
+      "nx format:write --base=main"
+    ]
   }
 }
