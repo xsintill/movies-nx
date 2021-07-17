@@ -67,7 +67,7 @@
   },
   "lint-staged": {
     "*.{js,json,css,scss,md,ts,html,graphql,svelte,tsx,jsx}": [
-      "nx format:write --base=main"
+      "nx format:write --uncommitted"
     ]
   }
 }
