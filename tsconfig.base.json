@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@lsn/core": ["libs/core/src/index.ts"]
+      "@lsn/core": ["libs/core/src/index.ts"],
+      "@lsn/film": ["libs/film/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
