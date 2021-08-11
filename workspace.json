@@ -108,6 +108,108 @@
           }
         }
       }
+    },
+    "svelte-client": {
+      "root": "apps/svelte-client",
+      "sourceRoot": "apps/svelte-client/src",
+      "projectType": "application",
+      "targets": {
+        "build": {
+          "executor": "@nxext/svelte:build",
+          "outputs": [
+            "{options.outputPath}"
+          ],
+          "options": {
+            "outputPath": "dist/apps/svelte-client",
+            "entryFile": "apps/svelte-client/src/main.ts",
+            "tsConfig": "apps/svelte-client/tsconfig.app.json",
+            "svelteConfig": "apps/svelte-client/svelte.config.cjs",
+            "assets": [
+              {
+                "glob": "/*",
+                "input": "apps/svelte-client/public/**",
+                "output": "./"
+              }
+            ]
+          },
+          "configurations": {
+            "production": {
+              "dev": false
+            }
+          }
+        },
+        "serve": {
+          "executor": "@nxext/svelte:build",
+          "options": {
+            "outputPath": "dist/apps/svelte-client",
+            "entryFile": "apps/svelte-client/src/main.ts",
+            "tsConfig": "apps/svelte-client/tsconfig.app.json",
+            "svelteConfig": "apps/svelte-client/svelte.config.cjs",
+            "assets": [
+              {
+                "glob": "/*",
+                "input": "apps/svelte-client/public/**",
+                "output": "./"
+              }
+            ],
+            "watch": true,
+            "serve": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "apps/svelte-client/**/*.{ts,svelte,spec.ts}"
+            ]
+          }
+        },
+        "check": {
+          "executor": "@nrwl/workspace:run-commands",
+          "options": {
+            "command": "svelte-check",
+            "cwd": "apps/svelte-client"
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/apps/svelte-client"
+          ],
+          "options": {
+            "jestConfig": "apps/svelte-client/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "svelte-client-e2e": {
+      "root": "apps/svelte-client-e2e",
+      "sourceRoot": "apps/svelte-client-e2e/src",
+      "projectType": "application",
+      "targets": {
+        "e2e": {
+          "executor": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/svelte-client-e2e/cypress.json",
+            "tsConfig": "apps/svelte-client-e2e/tsconfig.e2e.json",
+            "devServerTarget": "svelte-client:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "svelte-client:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "apps/svelte-client-e2e/**/*.{js,ts}"
+            ]
+          }
+        }
+      }
     }
   },
   "cli": {

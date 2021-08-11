@@ -35,6 +35,13 @@
     },
     "film": {
       "tags": []
+    },
+    "svelte-client": {
+      "tags": []
+    },
+    "svelte-client-e2e": {
+      "tags": [],
+      "implicitDependencies": ["svelte-client"]
     }
   }
 }
