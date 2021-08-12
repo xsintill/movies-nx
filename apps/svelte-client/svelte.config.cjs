@@ -4,5 +4,5 @@ const svelteSass = require('svelte-preprocess-sass');
 module.exports = {
   // Consult https://github.com/sveltejs/svelte-preprocess
   // for more information about preprocessors
-  preprocess: sveltePreprocess({sass: svelteSass.sass()})
+  preprocess: sveltePreprocess({sass: svelteSass.sass()}),
 };
