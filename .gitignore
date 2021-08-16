@@ -39,3 +39,6 @@ testem.log
 Thumbs.db
 
 .env
+report.*.json
+apps/svelte-client/src/environments/environment.prod.ts
+apps/svelte-client/src/environments/environment.ts

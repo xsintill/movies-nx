@@ -3,7 +3,7 @@
   "files": [],
   "include": [],
   "compilerOptions": {
-    "types":["svelte"]
+    "types":["svelte", "axios"]
   },
   "references": [
     {
