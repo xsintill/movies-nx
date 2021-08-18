@@ -11,11 +11,21 @@ export class FilmService {
     return { count:results[0]["count"], metadata};    
   }
   
-  async getLatest(search: string = '', pageSize: number = 10): Promise<{ results: unknown[], metadata: unknown }> {    
-    const [results, metadata] = await this.con.query(
+  async getLatest(search: string = '', pageSize: number = 10): Promise<{results: unknown[], totalCount: number, searchCount: number, metadata?: unknown }> {    
+    const [totalCountRecord] = await this.con.query(
+      `SELECT count(1) FROM [Film2].[dbo].[Films] `+
+      `WHERE Title IS NOT NULL`);
+    const [searchCountRecord] = await this.con.query(
+      `SELECT count(1) FROM [Film2].[dbo].[Films] `+
+      `WHERE Title LIKE '%${search}%'`);
+    const [results] = await this.con.query(
       `SELECT TOP(${pageSize}) * FROM [Film2].[dbo].[Films] `+
       `WHERE Title ${(search === '') ? 'IS NOT NULL' : `LIKE '%${search}%'`} `+
       `ORDER BY SeenAt DESC`);
-    return { results, metadata};    
+
+    const totalCount: number = <number>totalCountRecord[0][""];
+    const searchCount: number = <number>searchCountRecord[0][""];
+
+    return { results, totalCount, searchCount };    
   }
 }

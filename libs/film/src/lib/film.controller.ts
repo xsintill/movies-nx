@@ -10,6 +10,7 @@ export class filmController {
   getCount() {
     return this.filmService.getCount();
   }
+  
   @Get('latest')
   getLatest(
     @Query('search') search: string = '', 

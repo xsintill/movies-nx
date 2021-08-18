@@ -15,34 +15,44 @@
   import { latestMovies, tmdbMovies } from '../movie/movie.store';
   import { getIMDBNumber } from './IMDB.utils';
   import { getMovieByImdbId } from '../tmdb/TMDB.utils';
+  import type { FilmResponse } from '../axios/FilmResponse.type';
 	
 	let error;
+  let numberOfMoviesFound: number;
   function refresh() {
-    get<Movie[]>(`api/film/latest?search=${$searchTerm}`).then(res => {	
-      const internalTmdbMovies: Movie[] = [];
-      let i: number = 0;
-      const movies = res.map(item => {      
-        const imdbNumber = getIMDBNumber(item.Url);
-        tmdbMovies.update(t=>{
-          getMovieByImdbId(imdbNumber).then((tmdb) => {
-            internalTmdbMovies.push({
-              ...item,
-              imdbNumber,
-              tmdbMovie: tmdb,
+    let movies: Movie[] = [];
+    get<Movie[]>(`api/film/latest?search=${$searchTerm}`).then(({results:res, totalCount, searchCount}: FilmResponse<Movie[]>) => {	
+      numberOfMoviesFound = searchCount;
+      if (res.length !== 0) {
+        const internalTmdbMovies: Movie[] = [];
+        let i: number = 0;
+        movies = res.map(item => {      
+          const imdbNumber = getIMDBNumber(item?.Url);
+          tmdbMovies.update(t=>{
+            getMovieByImdbId(imdbNumber).then((tmdb) => {
+              internalTmdbMovies.push({
+                ...item,
+                imdbNumber,
+                tmdbMovie: tmdb,
+              });
+              i++;
+              if (i >= internalTmdbMovies.length) {
+                tmdbMovies.set(internalTmdbMovies);
+              }
             });
-            i++;
-            if (i >= internalTmdbMovies.length) {
-              tmdbMovies.set(internalTmdbMovies);
-            }
+            return [...t]
           });
-          return [...t]
+          return {
+            ...item, 
+            imdbNumber
+          }
         });
-        return {
-          ...item, 
-          imdbNumber
-        }
-      });
+      } 
       latestMovies.set(movies);
+      movies.length === 0 && tmdbMovies.set([]);
+      if (movies.length === 0) {
+        numberOfMoviesFound = 0;
+      }
     });
   }
 
@@ -66,7 +76,11 @@
     <!-- <List class="demo-list" twoLine avatarList> -->
     
   <Search on:input={handleInput} label={'Search'}/>
-      {#each $tmdbMovies as {Url, Title, SeenAt, tmdbMovie}}
+  {numberOfMoviesFound}
+  {#if $tmdbMovies.length === 0}
+    No movies found searching {$searchTerm}
+  {:else}
+    {#each $tmdbMovies as {Url, Title, SeenAt, tmdbMovie}}
       <MovieRow on:click={()=>movieClickHandler(Url)}>
         <MovieTitle>{Title}</MovieTitle>(<Year date={tmdbMovie?.release_date} />)
         <MovieSeenAt date={SeenAt}></MovieSeenAt>    
@@ -78,13 +92,14 @@
         </div>
         <!-- {JSON.stringify(tmdbMovie)} -->
       </MovieRow>
-        <!-- <Item on:click={movieClickHandler(Url)}>
-          <Graphic style="background-image: url(https://place-hold.it/40x40?text=&fontsize=16);" />
-          <Text>
-            {tmdbMovie?.release_date}        
-          </Text>
-        </Item> -->
-      {/each} 
+      <!-- <Item on:click={movieClickHandler(Url)}>
+        <Graphic style="background-image: url(https://place-hold.it/40x40?text=&fontsize=16);" />
+        <Text>
+          {tmdbMovie?.release_date}        
+        </Text>
+      </Item> -->
+    {/each}
+  {/if} 
     <!-- </List> -->
   </div>
 {/if}
