@@ -1,6 +1,6 @@
 <script lang="ts">
   export let rate: number;
-  export let voteCount: number;
+  // export let voteCount: number;
 </script>
 
 <span class="movie-rating" title="TMDB User Rating">

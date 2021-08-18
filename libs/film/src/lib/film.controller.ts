@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 
 import { FilmService } from './film.service';
 
@@ -11,7 +11,9 @@ export class filmController {
     return this.filmService.getCount();
   }
   @Get('latest')
-  getLatest(pageSize?: number) {
-    return this.filmService.getLatest(pageSize);
+  getLatest(
+    @Query('search') search: string = '', 
+    @Query('pageSize') pageSize?: number) {
+    return this.filmService.getLatest(search, pageSize);
   }
 }
