@@ -105,7 +105,7 @@
             "outputPath": "dist/apps/svelte-client",
             "entryFile": "apps/svelte-client/src/main.ts",
             "tsConfig": "apps/svelte-client/tsconfig.app.json",
-            "svelteConfig": "apps/svelte-client/svelte.config.cjs",
+            "rollupConfig": "apps/svelte-client/rollup.config.js",
             "assets": [
               {
                 "glob": "/*",
@@ -126,7 +126,10 @@
             "outputPath": "dist/apps/svelte-client",
             "entryFile": "apps/svelte-client/src/main.ts",
             "tsConfig": "apps/svelte-client/tsconfig.app.json",
-            "svelteConfig": "apps/svelte-client/svelte.config.cjs",
+            "rollupConfig": "apps/svelte-client/rollup.config.js",
+            "proxy": {
+              "api": "http://localhost:3000"
+            },
             "assets": [
               {
                 "glob": "/*",

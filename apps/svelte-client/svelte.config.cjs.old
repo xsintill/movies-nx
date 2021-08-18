@@ -6,5 +6,15 @@ module.exports = {
   // for more information about preprocessors
   preprocess: sveltePreprocess({
     sass: svelteSass.sass()
-  })
+  }),
+  compilerOptions: {
+    // output:{
+    // globals: {
+    //     'svelte': 'svelte',
+    //   }
+    // }
+  }
+  // globals: {
+  //   'svelte': 'svelte',
+  // }
 };
