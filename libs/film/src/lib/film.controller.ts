@@ -14,7 +14,8 @@ export class filmController {
   @Get('latest')
   getLatest(
     @Query('search') search: string = '', 
+    @Query('pageIndex') pageIndex?: number,
     @Query('pageSize') pageSize?: number) {
-    return this.filmService.getLatest(search, pageSize);
+    return this.filmService.getLatest(search, pageIndex, pageSize);
   }
 }

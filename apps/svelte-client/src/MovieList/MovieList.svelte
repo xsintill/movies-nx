@@ -6,6 +6,7 @@
   import MovieRow from './MovieRow/MovieRow.svelte';
   import Poster from './MoviePoster/MoviePoster.svelte';
   import MovieRating from './MovieRating/MovieRating.svelte';
+  // import Virtuallist from '../ui/VirtualList/Virtuallist.svelte';
   import Search from '../Search/Search.svelte';
   import {searchTerm} from '../Search/search.store';
   // // import { IMDBNumber } from './IMDBNumber/index';
@@ -19,9 +20,9 @@
 	
 	let error;
   let numberOfMoviesFound: number;
-  function refresh() {
+  function refresh(pageIndex: number) {
     let movies: Movie[] = [];
-    get<Movie[]>(`api/film/latest?search=${$searchTerm}`).then(({results:res, totalCount, searchCount}: FilmResponse<Movie[]>) => {	
+    get<Movie[]>(`api/film/latest?search=${$searchTerm}&pageIndex=${pageIndex}`).then(({results:res, totalCount, searchCount}: FilmResponse<Movie[]>) => {	
       numberOfMoviesFound = searchCount;
       if (res.length !== 0) {
         const internalTmdbMovies: Movie[] = [];
@@ -56,15 +57,11 @@
     });
   }
 
-  function movieClickHandler(url: string) {
-    console.log(1,url)
-    // window.open(url)    
-  }
   const handleInput = debounce((event) => {
     searchTerm.set(event.target.value);
-    refresh()
+    refresh(0);
   },300)
-  refresh()
+  refresh(0);
 </script>
 
 {#if error}
@@ -81,7 +78,7 @@
     No movies found searching {$searchTerm}
   {:else}
     {#each $tmdbMovies as {Url, Title, SeenAt, tmdbMovie}}
-      <MovieRow on:click={()=>movieClickHandler(Url)}>
+      <MovieRow url={Url}>
         <MovieTitle>{Title}</MovieTitle>(<Year date={tmdbMovie?.release_date} />)
         <MovieSeenAt date={SeenAt}></MovieSeenAt>    
         <Poster src={tmdbMovie?.poster_path} alt={`Poster for movie '${Title}'`} />   
