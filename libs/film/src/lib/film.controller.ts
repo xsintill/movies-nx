@@ -10,6 +10,11 @@ export class filmController {
   getCount() {
     return this.filmService.getCount();
   }
+
+  @Get('getWordCount')
+  getWordCount(@Query('word') word: string) {
+    return this.filmService.getWordCount(word);
+  }
   
   @Get('latest')
   getLatest(
