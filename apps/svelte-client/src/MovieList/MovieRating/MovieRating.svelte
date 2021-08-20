@@ -1,12 +1,11 @@
 <script lang="ts">
   export let rate: number;
-  // export let voteCount: number;
 </script>
 
-<span class="movie-rating" title="TMDB User Rating">
+{#if (rate)}<span class="movie-rating" title="TMDB User Rating">
   {rate}
-  <!-- /{voteCount} -->
 </span>
+{/if}
 
 <style lang="scss">
   .movie-rating {    
