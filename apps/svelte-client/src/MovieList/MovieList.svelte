@@ -7,11 +7,13 @@
   import MovieRow from './MovieRow/MovieRow.svelte';
   import Poster from './MoviePoster/MoviePoster.svelte';
   import MovieRating from './MovieRating/MovieRating.svelte';
+  import MovieDescription from './MovieDescription/MovieDescription.svelte';
   import WordCount from './WordCount/WordCount.svelte';
   import Statistics from './Statistics/Statistics.svelte';
   // import Virtuallist from '../ui/VirtualList/Virtuallist.svelte';
   import Search from '../Search/Search.svelte';
   import {searchTerm} from '../Search/search.store';
+  import Dialog from '../ui/Dialog/Dialog.svelte';
   // // import { IMDBNumber } from './IMDBNumber/index';
   import { Year } from './Year/index';
   import get from '../axios/get';
@@ -21,6 +23,7 @@
   import type { Movie, PagedMovie } from '../movie/movie.type';
 	
 	let error;
+  let modal;
   let numberOfMoviesSearched: number;
   let numberOfMoviesInDB: number;
   let numberOfMoviesTotal: number;
@@ -48,8 +51,9 @@
       if (res.length !== 0) {
         const internalTmdbMovies: Movie[] = [];
         let i: number = 0;
-        movies = res.map(item => {                          
+        movies = res.map(item => {  
           const imdbNumber = getIMDBNumber(item?.Url);
+          if (!imdbNumber) return {...item};
           tmdbMovies.update(t=>{
             getMovieByImdbId(imdbNumber).then((tmdb) => {
               internalTmdbMovies.push({
@@ -83,6 +87,7 @@
     refresh(0);
   },300)
   refresh(0);
+  // modal.show()
 </script>
 
 {#if error}
@@ -113,12 +118,15 @@
           <WordCount wordCount={wordCount} />
           
           <!-- <Trailer video={tmdbMovie?.videos}/> -->
-          <div>
-            {tmdbMovie?.overview}
-          </div>
+          <MovieDescription description={tmdbMovie?.overview} />
         </MovieRow>      
       {/each}
     {/if} 
+    <!-- <Dialog bind:this={modal}>
+      <h2>Modal title</h2>
+      <p>Modal content.</p>
+      <button on:click={() => modal.hide()}>Close</button>
+    </Dialog> -->
   </div>
 {/if}
 
