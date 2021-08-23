@@ -58,8 +58,6 @@ export class FilmService {
     })
 
     let values = await Promise.all(promises);
-    console.log('values',values)
-    console.log('results',results)
 
     const seenAfterCrashCount = <number>seenAfterCrashRecord[0][""];
     const totalCount = seenAfterCrashCount + TotalFilmsSeenLastCrash;
@@ -79,7 +77,9 @@ export class FilmService {
   }
 
   private async getWords(title:string): Promise<WordCount[]> {
-    const words = title.match(/\b(\w+)'?(\w+)?\b(?<!\bthe\b|\b[0-9]\b|\ba\b)/g);
+    // Only match words which must be 2 characters or longer than 2
+    // No the, a, in, of or numbers
+    const words = title.match(/\b(\w{2,})'?(\w{2,})?\b(?<!\bthe\b|\b[0-9]\b|\ba\b|\bof\b|\bin\b)/g);
     const promises: Promise<{ word: string; count: number; metadata: unknown; }>[] =[];
     words && words.forEach(async (word)=>{
       promises.push(this.getWordCount(word));
