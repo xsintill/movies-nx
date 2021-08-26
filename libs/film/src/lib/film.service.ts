@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Sequelize } from 'sequelize-typescript';
 
 import { StartDateNewCounting, TotalFilmsSeenLastCrash } from './film.const';
-import type { Movie, PagedMovie, WordCount } from './film.type';
+import type { DbMovie, Movie, PagedMovie, WordCount } from './film.type';
 
 @Injectable()
 export class FilmService {
@@ -75,6 +75,15 @@ export class FilmService {
       pageSize,
     };
   }
+
+  async add({Title, Url, SeenAt}: DbMovie): Promise<[unknown[], unknown]> {
+    console.log('service add')
+    return await this.con.query(
+      `INSERT INTO [Film2].[dbo].[Films] (Title, Url, SeenAt)
+      VALUES ('${Title}', '${Url}', '${new Date(SeenAt).toISOString().slice(0, 10)}')`);
+  }
+
+
 
   private async getWords(title:string): Promise<WordCount[]> {
     // Only match words which must be 2 characters or longer than 2
