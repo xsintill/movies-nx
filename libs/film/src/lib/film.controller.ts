@@ -1,26 +1,32 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body } from '@nestjs/common';
 
 import { FilmService } from './film.service';
+import { DbMovie } from './film.type';
 
 @Controller('film')
 export class filmController {
   constructor(private readonly filmService: FilmService) {}
 
   @Get('count')
-  getCount() {
-    return this.filmService.getCount();
+  async getCount() {
+    return await this.filmService.getCount();
   }
 
   @Get('getWordCount')
-  getWordCount(@Query('word') word: string) {
-    return this.filmService.getWordCount(word);
+  async getWordCount(@Query('word') word: string) {
+    return await this.filmService.getWordCount(word);
   }
   
   @Get('latest')
-  getLatest(
+  async getLatest(
     @Query('search') search: string = '', 
     @Query('pageIndex') pageIndex?: number,
     @Query('pageSize') pageSize?: number) {
-    return this.filmService.getLatest(search, pageIndex, pageSize);
+    return await this.filmService.getLatest(search, pageIndex, pageSize);
+  }
+
+  @Post('add')
+  async add(@Body() movie: DbMovie){
+    return await this.filmService.add(movie);
   }
 }
