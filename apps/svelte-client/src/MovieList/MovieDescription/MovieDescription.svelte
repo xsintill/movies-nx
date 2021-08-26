@@ -12,7 +12,6 @@
     font-style: italic;
     &::first-letter {
       font-size: 200%;
-      /* color: #8A2BE2; */
     }
   }
 </style>
