@@ -57,3 +57,21 @@ export interface TMDBSearchMovieResult {
   vote_average: number
 }
 
+export interface TMDBMovieVideos { 
+  id?: number;
+  results: TMDBMovieVideo[];
+}
+
+export interface TMDBMovieVideo { 
+  iso_639_1?: string;
+  iso_3166_1?: string;  
+  name?: string;  
+  key?: string;  
+  site?: string;  
+  size?: number;  
+  type?: string;  
+  official?: boolean;  
+  published_at?: string;  
+  id?: string;
+}
+

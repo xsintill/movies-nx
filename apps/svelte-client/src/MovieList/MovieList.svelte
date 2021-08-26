@@ -2,6 +2,7 @@
   // import List, { Item, Graphic, Text } from '@smui/list';
   import {debounce} from 'lodash';
 
+  import MovieForm from '../MovieForm/MovieForm.svelte';
   import MovieTitle from './MovieTitle/MovieTitle.svelte';
   import MovieSeenAt from './MovieSeenAt/MovieSeenAt.svelte';
   import MovieRow from './MovieRow/MovieRow.svelte';
@@ -9,6 +10,7 @@
   import MovieRating from './MovieRating/MovieRating.svelte';
   import MovieDescription from './MovieDescription/MovieDescription.svelte';
   import WordCount from './WordCount/WordCount.svelte';
+  import Videos from './Videos/Videos.svelte';
   import Statistics from './Statistics/Statistics.svelte';
   // import Virtuallist from '../ui/VirtualList/Virtuallist.svelte';
   import Search from '../Search/Search.svelte';
@@ -131,7 +133,7 @@
           <MovieRating rate={tmdbMovie?.vote_average} /> 
           <WordCount wordCount={wordCount} />
           
-          <!-- <Trailer video={tmdbMovie?.videos}/> -->
+          <Videos tmdbId={tmdbMovie?.id}/>
           <MovieDescription description={tmdbMovie?.overview} />
         </MovieRow>      
       {/each}

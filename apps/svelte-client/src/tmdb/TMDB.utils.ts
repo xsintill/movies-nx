@@ -1,7 +1,6 @@
-import { dataset_dev } from 'svelte/internal';
 import { ax } from '../axios/axios';
 import { environment } from '../environments/environment';
-import type { TMDBMovie, TMDBSearchMovieResult } from './TMDB.type';
+import type { TMDBMovie, TMDBMovieVideos, TMDBSearchMovieResult } from './TMDB.type';
 
 const url = 'https://api.themoviedb.org/3/';
 
@@ -17,4 +16,8 @@ export async function searchMovie(title: string): Promise<TMDBSearchMovieResult>
 
 export async function getMovie(tmdbId: number): Promise<TMDBMovie> {
   return (await ax.get(`${url}movie/${tmdbId}?api_key=${environment.tmdbApiKey}`)).data;
+}
+
+export async function getMovieVideos(tmdbId: number): Promise<TMDBMovieVideos> {
+  return (await ax.get(`${url}movie/${tmdbId}/videos?api_key=${environment.tmdbApiKey}`)).data;
 }
