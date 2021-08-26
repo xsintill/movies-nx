@@ -83,7 +83,11 @@ export class FilmService {
       VALUES ('${Title}', '${Url}', '${new Date(SeenAt).toISOString().slice(0, 10)}')`);
   }
 
-
+  async remove(id: number): Promise<[unknown[], unknown]> {
+    console.log('service remove')
+    return await this.con.query(
+      `DELETE [Film2].[dbo].[Films] WHERE Id = ${id}`);
+  }
 
   private async getWords(title:string): Promise<WordCount[]> {
     // Only match words which must be 2 characters or longer than 2

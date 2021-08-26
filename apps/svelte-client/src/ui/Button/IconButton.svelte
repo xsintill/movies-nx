@@ -7,10 +7,12 @@
     export let viewBox: string = `0 0 ${width} ${height}`;
 </script>
 
-<button type="button" on:click {...$$props}>
+<button {...$$props} type="button" on:click >
     <Icon name={iconName} {width} {height} {viewBox} />
 </button>
 
-<style>
- 
+<style lang="scss">
+    button {
+        cursor: pointer;
+    } 
 </style>

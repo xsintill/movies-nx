@@ -4,5 +4,8 @@
 
 <button type="button" on:click {...$$props}>{label ? label : ''}<slot/></button>
 
-<style>
+<style lang="scss">
+    button:hover {
+        cursor: pointer;
+    } 
 </style>

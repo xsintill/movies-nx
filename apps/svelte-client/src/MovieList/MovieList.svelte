@@ -17,10 +17,12 @@
   import {searchTerm} from '../Search/search.store';
   import Dialog from '../ui/Dialog/Dialog.svelte';
   import IconButton from '../ui/Button/IconButton.svelte';
+  import Button from '../ui/Button/Button.svelte';
   // // import { IMDBNumber } from './IMDBNumber/index';
   import { Year } from './Year/index';
   import { get } from '../axios/get';
   import { post } from '../axios/post';
+  import { remove } from '../axios/remove';
   import { latestMovies, tmdbMovies } from '../movie/movie.store';
   import { getIMDBNumber } from './IMDB.utils';
   import { getMovieByImdbId } from '../tmdb/TMDB.utils';
@@ -28,12 +30,14 @@
 	
 	let error;
   let dialog: Dialog;
+  let deleteConfirmationDialog: Dialog;
   let movie: DbMovie;
   let numberOfMoviesSearched: number;
   let numberOfMoviesInDB: number;
   let numberOfMoviesTotal: number;
   let numberOfMoviesSeenAfterCrash: number;
   let numberOfMoviesToAddUntilCompletion: number;
+  let selectedMovie: Movie;
 
   function refresh(pageIndex: number) {
     let movies: Movie[] = [];
@@ -98,6 +102,12 @@
     dialog.show();
   } 
 
+  function showDeleteConfirmationDialog(tmdbMovie: Movie) {
+    console.log(tmdbMovie)
+    selectedMovie = tmdbMovie;
+    deleteConfirmationDialog.show();
+  } 
+
   async function saveClickHandler() {
     //TODO:add validation before adding movie
     post(`api/film/add`, movie).then(()=>{
@@ -105,6 +115,14 @@
       refresh(0);
     });
   } 
+
+  async function deleteClickHandler() {
+    console.log('delete confirmed clicked');
+    remove(`api/film/remove/${selectedMovie.Id}`).then(()=>{
+      deleteConfirmationDialog.hide();
+      refresh(0);
+    });
+  }
 </script>
 
 {#if error}
@@ -125,27 +143,36 @@
     {#if $tmdbMovies.length === 0}
       No movies found searching {$searchTerm}
     {:else}
-      {#each $tmdbMovies as {Url, Title, SeenAt, tmdbMovie, wordCount}}
-        <MovieRow url={Url}>
-          <MovieTitle>{Title}</MovieTitle>(<Year date={tmdbMovie?.release_date} />)
-          <MovieSeenAt date={SeenAt}></MovieSeenAt>    
-          <Poster src={tmdbMovie?.poster_path} alt={`Poster for movie '${Title}'`} />   
-          <MovieRating rate={tmdbMovie?.vote_average} /> 
-          <WordCount wordCount={wordCount} />
+      {#each $tmdbMovies as movie}
+        <MovieRow>
+          <MovieTitle>{movie?.Title}</MovieTitle>(<Year date={movie?.tmdbMovie?.release_date} />)
+          <MovieSeenAt date={movie?.SeenAt}></MovieSeenAt>    
+          <Poster url={movie?.Url} src={movie?.tmdbMovie?.poster_path} alt={`Poster for movie '${movie?.Title}'`} />   
+          <MovieRating rate={movie?.tmdbMovie?.vote_average} /> 
+          <WordCount wordCount={movie?.wordCount} />
           
-          <Videos tmdbId={tmdbMovie?.id}/>
-          <MovieDescription description={tmdbMovie?.overview} />
+          <Videos tmdbId={movie?.tmdbMovie?.id}/>
+          <MovieDescription description={movie?.tmdbMovie?.overview} />
+          <IconButton iconName="bin" on:click={()=>showDeleteConfirmationDialog(movie)}/>
         </MovieRow>      
       {/each}
     {/if} 
     <Dialog bind:this={dialog}>
       <h2>Add new movie</h2>
       <MovieForm bind:movie={movie}/>
-      <button on:click={() => saveClickHandler()}>Save</button>
+      <Button on:click={() => saveClickHandler()}>Save</Button>
+    </Dialog>
+    <Dialog bind:this={deleteConfirmationDialog}>
+      <h2>Are you sure you want to delete <span class="movie-title">'{selectedMovie?.Title}'</span>?</h2>
+      <Button on:click={() => deleteConfirmationDialog.hide()}>Cancel</Button>
+      <Button on:click={() => deleteClickHandler()}>Delete</Button>
     </Dialog>
   </div>
 {/if}
 
 <style lang="scss">
+  .movie-title {
+    text-transform: capitalize;
+  }
 </style>
 

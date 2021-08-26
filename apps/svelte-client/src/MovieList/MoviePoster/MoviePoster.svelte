@@ -4,12 +4,23 @@
   export let src: string;
   export let alt: string;
   export let size: string = TMDBPosterSize.w154;
-  let widthClass = size
+  export let url: string;
+
+  let widthClass = size;
+
+  function clickHandler(url: string) {
+    window.open(url);   
+  }
 
   $: posterPath = src ? `http://image.tmdb.org/t/p/${size}/${src}`: '/assets/images/placeholder-movie-poster.jpg'; 
 </script>
 
-<img {...$$props} class={`${$$props.class || ''} ${widthClass}`} src={posterPath} alt={alt} >
+<img 
+  {...$$props} 
+  class={`${$$props.class || ''} ${widthClass}`} 
+  src={posterPath} 
+  alt={alt}
+  on:click={()=>clickHandler(url)} />
 
 
 <style lang="scss">
@@ -31,5 +42,7 @@
   .w780 {
     width: 780px;
   }
-
+  img:hover {    
+    cursor: pointer;
+  }
 </style>

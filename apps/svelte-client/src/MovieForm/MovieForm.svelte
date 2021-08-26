@@ -72,16 +72,14 @@
         grid-row-end: 5;
 
     }
-    .movie-poster {
+    /* .movie-poster {
         background-color: yellow;
         grid-column-start: 2;
         grid-column-end: -1;
         grid-row-start: 1;
         grid-row-end: 4;
-        /* height: 400px; */
         width: 342px;
-
-    }
+    } */
     :global([ref=movie-form-controls]) {
         grid-column-start: 1;
         grid-column-end: 2;
