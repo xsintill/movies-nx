@@ -7,8 +7,8 @@
     export let viewBox: string = `0 0 ${width} ${height}`;
 </script>
 
-<button type="button" on:click>
-    <Icon name={iconName} {width} {height} {viewBox}/>
+<button type="button" on:click {...$$props}>
+    <Icon name={iconName} {width} {height} {viewBox} />
 </button>
 
 <style>
