@@ -14,16 +14,19 @@
   import Search from '../Search/Search.svelte';
   import {searchTerm} from '../Search/search.store';
   import Dialog from '../ui/Dialog/Dialog.svelte';
+  import IconButton from '../ui/Button/IconButton.svelte';
   // // import { IMDBNumber } from './IMDBNumber/index';
   import { Year } from './Year/index';
-  import get from '../axios/get';
+  import { get } from '../axios/get';
+  import { post } from '../axios/post';
   import { latestMovies, tmdbMovies } from '../movie/movie.store';
   import { getIMDBNumber } from './IMDB.utils';
   import { getMovieByImdbId } from '../tmdb/TMDB.utils';
-  import type { Movie, PagedMovie } from '../movie/movie.type';
+  import type { DbMovie, Movie, PagedMovie } from '../movie/movie.type';
 	
 	let error;
-  let modal;
+  let dialog: Dialog;
+  let movie: DbMovie;
   let numberOfMoviesSearched: number;
   let numberOfMoviesInDB: number;
   let numberOfMoviesTotal: number;
@@ -82,12 +85,24 @@
     });
   }
 
-  const handleInput = debounce((event) => {
+  const searchValueChangeHandler = debounce((event) => {
     searchTerm.set(event.target.value);
     refresh(0);
-  },300)
+  },300);
+
   refresh(0);
-  // modal.show()
+
+  function newClickHandler() {
+    dialog.show();
+  } 
+
+  async function saveClickHandler() {
+    //TODO:add validation before adding movie
+    post(`api/film/add`, movie).then(()=>{
+      dialog.hide();
+      refresh(0);
+    });
+  } 
 </script>
 
 {#if error}
@@ -96,8 +111,8 @@
 {/if}
 {#if !error}
   <div>
-    
-    <Search on:input={handleInput} label={'Search'}/>
+    <Search on:input={searchValueChangeHandler} label={'Search'}/> 
+    <IconButton iconName={'add'} viewBox={'0 -2 24 24'} on:click={()=>newClickHandler()}/> 
     <Statistics 
       searchedCount={numberOfMoviesSearched} 
       inDBCount={numberOfMoviesInDB} 
@@ -105,7 +120,6 @@
       addUntilCompleteCount={numberOfMoviesToAddUntilCompletion} 
       seenAfterCrashCount={numberOfMoviesSeenAfterCrash} 
     />
-    <!-- {numberOfMoviesSearched}/{numberOfMoviesInDB}/{numberOfMoviesTotal}/{numberOfMoviesToAddUntilCompletion} -->
     {#if $tmdbMovies.length === 0}
       No movies found searching {$searchTerm}
     {:else}
@@ -122,11 +136,14 @@
         </MovieRow>      
       {/each}
     {/if} 
-    <!-- <Dialog bind:this={modal}>
-      <h2>Modal title</h2>
-      <p>Modal content.</p>
-      <button on:click={() => modal.hide()}>Close</button>
-    </Dialog> -->
+    <Dialog bind:this={dialog}>
+      <h2>Add new movie</h2>
+      <MovieForm bind:movie={movie}/>
+      <button on:click={() => saveClickHandler()}>Save</button>
+    </Dialog>
   </div>
 {/if}
+
+<style lang="scss">
+</style>
 
