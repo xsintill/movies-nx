@@ -92,7 +92,27 @@ export class FilmService {
   private async getWords(title:string): Promise<WordCount[]> {
     // Only match words which must be 2 characters or longer than 2
     // No the, a, in, of or numbers
-    const words = title.match(/\b(\w{2,})'?(\w{2,})?\b(?<!\bthe\b|\b[0-9]\b|\ba\b|\bof\b|\bin\b)/g);
+    const veryCommonWords: string[] = [
+      'a',
+      'aka',
+      'and',
+      'do',
+      'hi',
+      'in',
+      'is',
+      'it',
+      'me',
+      'no',
+      'of',
+      'on',
+      'or',
+      'the',
+      'to',
+    ];
+    const wordsRegex = new RegExp(`\\b(\\w{2,})'?(\\w{2,})?\\b(?<!\\b[0-9].*\\b|\\b${veryCommonWords.join('\\b|\\b')}\\b)`, 'g');
+    //match the words and make unique
+    const words = title.match(wordsRegex).filter((value: string, index: number, array: string[])=> array.indexOf(value) === index);
+    //const words = title.match(/\b(\w{2,})'?(\w{2,})?\b(?<!\bthe\b|\b[0-9]\b|\ba\b|\bof\b|\bin\b|\bis\b|\bor\b|\bme\b|\bit\b|\bdo\b|\band\b)/g);
     const promises: Promise<{ word: string; count: number; metadata: unknown; }>[] =[];
     words && words.forEach(async (word)=>{
       promises.push(this.getWordCount(word));
