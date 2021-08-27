@@ -16,9 +16,13 @@ export class FilmService {
   }
 
   async getWordCount(search: string): Promise<{ word: string, count: number, metadata: unknown }> {
+    const word = this.escape(search);
     const [results, metadata] = await this.con.query(
       `SELECT count(1) as count FROM [FILM2].[DBO].[FILMS]` +
-      `WHERE Title LIKE '%${this.escape(search)}%'`);
+      `WHERE Title LIKE '%[^a-Z0-9]${word}[^a-Z0-9]%' OR ` +
+      `Title LIKE '${word}[^a-Z0-9]%' OR `+
+      `Title LIKE '%[^a-Z0-9]${word}' OR `+
+      `Title LIKE '${word}'`);
     return { word: search, count: results[0]["count"], metadata };
   }
 
@@ -97,27 +101,29 @@ export class FilmService {
   private async getWords(title:string): Promise<WordCount[]> {
     // Only match words which must be 2 characters or longer than 2
     // No the, a, in, of or numbers
+    // Add any of the common words which have an occurance count of 100 and higher
     const veryCommonWords: string[] = [
       'a',
       'aka',
+      // 'all',
       'and',
-      'do',
-      'hi',
+      // 'do',
+      // 'hi',
       'in',
-      'is',
-      'it',
-      'me',
-      'no',
+      // 'is',
+      // 'it',
+      // 'me',
+      // 'no',
       'of',
-      'on',
-      'or',
+      // 'on',
+      // 'or',
       'the',
       'to',
     ];
     const wordsRegex = new RegExp(`\\b(\\w{2,})'?(\\w{2,})?\\b(?<!\\b[0-9].*\\b|\\b${veryCommonWords.join('\\b|\\b')}\\b)`, 'g');
     //match the words and make unique
     let words = title.match(wordsRegex)
-      .filter((value: string, index: number, array: string[])=> array.indexOf(value) === index);
+    words = (words) ? words.filter((value: string, index: number, array: string[])=> array.indexOf(value) === index) : [];
     //no patterns with "he'"" or "she'" allowed remove the '
     words.forEach((word, index)=> words[index] = word.replace("'", ""));
     //const words = title.match(/\b(\w{2,})'?(\w{2,})?\b(?<!\bthe\b|\b[0-9]\b|\ba\b|\bof\b|\bin\b|\bis\b|\bor\b|\bme\b|\bit\b|\bdo\b|\band\b)/g);
