@@ -116,7 +116,10 @@ export class FilmService {
     ];
     const wordsRegex = new RegExp(`\\b(\\w{2,})'?(\\w{2,})?\\b(?<!\\b[0-9].*\\b|\\b${veryCommonWords.join('\\b|\\b')}\\b)`, 'g');
     //match the words and make unique
-    const words = title.match(wordsRegex).filter((value: string, index: number, array: string[])=> array.indexOf(value) === index);
+    let words = title.match(wordsRegex)
+      .filter((value: string, index: number, array: string[])=> array.indexOf(value) === index);
+    //no patterns with "he'"" or "she'" allowed remove the '
+    words.forEach((word, index)=> words[index] = word.replace("'", ""));
     //const words = title.match(/\b(\w{2,})'?(\w{2,})?\b(?<!\bthe\b|\b[0-9]\b|\ba\b|\bof\b|\bin\b|\bis\b|\bor\b|\bme\b|\bit\b|\bdo\b|\band\b)/g);
     const promises: Promise<{ word: string; count: number; metadata: unknown; }>[] =[];
     words && words.forEach(async (word)=>{
