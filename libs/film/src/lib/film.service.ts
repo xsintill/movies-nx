@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { isNumber } from 'node:util';
 import { Sequelize } from 'sequelize-typescript';
 
 import { StartDateNewCounting, TotalFilmsSeenLastCrash } from './film.const';
@@ -17,7 +18,7 @@ export class FilmService {
   async getWordCount(search: string): Promise<{ word: string, count: number, metadata: unknown }> {
     const [results, metadata] = await this.con.query(
       `SELECT count(1) as count FROM [FILM2].[DBO].[FILMS]` +
-      `WHERE Title LIKE '%${search}%'`);
+      `WHERE Title LIKE '%${this.escape(search)}%'`);
     return { word: search, count: results[0]["count"], metadata };
   }
 
@@ -30,7 +31,7 @@ export class FilmService {
     if (search !== '') {
       const [searchRecord] = await this.con.query(
         `SELECT count(1) FROM [Film2].[dbo].[Films] ` +
-        `WHERE Title LIKE '%${search}%'`);
+        `WHERE Title LIKE '%${this.escape(search)}%'`);
 
       searchCount = <number>searchRecord[0][""];
     } else {
@@ -43,7 +44,7 @@ export class FilmService {
 
     const [res] = await this.con.query(
       `SELECT * FROM [Film2].[dbo].[Films] ` +
-      `WHERE Title ${(search === '') ? 'IS NOT NULL' : `LIKE '%${search}%'`} ` +
+      `WHERE Title ${(search === '') ? 'IS NOT NULL' : `LIKE '%${this.escape(search)}%'`} ` +
       `ORDER BY SeenAt DESC ` +
       `OFFSET ${pageIndex * pageSize} ROWS ` +
       `FETCH NEXT ${pageSize} ROWS ONLY;`);
@@ -80,15 +81,19 @@ export class FilmService {
     console.log('service add')
     return await this.con.query(
       `INSERT INTO [Film2].[dbo].[Films] (Title, Url, SeenAt)
-      VALUES ('${Title}', '${Url}', '${new Date(SeenAt).toISOString().slice(0, 10)}')`);
+      VALUES ('${this.escape(Title)}', '${this.escape(Url)}', '${this.escape(new Date(SeenAt).toISOString().slice(0, 10))}')`);
   }
 
   async remove(id: number): Promise<[unknown[], unknown]> {
     console.log('service remove')
     return await this.con.query(
-      `DELETE [Film2].[dbo].[Films] WHERE Id = ${id}`);
+      `DELETE [Film2].[dbo].[Films] WHERE Id = ${this.escape(id)}`);
   }
 
+  private escape(value: string | number): string {
+    if (typeof (value) === 'number' ) return;
+    return value.replace("'","''")    
+  }
   private async getWords(title:string): Promise<WordCount[]> {
     // Only match words which must be 2 characters or longer than 2
     // No the, a, in, of or numbers
