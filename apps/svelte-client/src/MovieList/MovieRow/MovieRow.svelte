@@ -6,7 +6,7 @@
 </script>
 
 <!-- on:click={()=>clickHandler(url)} -->
-<div>
+<div on:click>
   <slot />
 </div>
 

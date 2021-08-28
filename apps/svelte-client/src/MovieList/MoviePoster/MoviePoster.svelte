@@ -8,7 +8,8 @@
 
   let widthClass = size;
 
-  function clickHandler(url: string) {
+  function clickHandler(url: string, e) {
+    e.stopPropagation();
     window.open(url);   
   }
 
@@ -20,7 +21,7 @@
   class={`${$$props.class || ''} ${widthClass}`} 
   src={posterPath} 
   alt={alt}
-  on:click={()=>clickHandler(url)} />
+  on:click={(e)=>clickHandler(url,e)} />
 
 
 <style lang="scss">

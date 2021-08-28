@@ -1,12 +1,15 @@
 <script>
   let shown = false;
+  export let onclose;
   export function show() {
     shown = true;
-    console.log('shown:', shown);
   }
   export function hide() {
     shown = false;
-    console.log('shown:', shown);
+  }
+  function closeHandler() {
+      onclose();
+      hide();
   }
 </script>
 
@@ -21,7 +24,7 @@
 {#if shown}
   <div class="modal-wrapper">
     <div class="modal">
-      <span class="close" on:click={() => hide()}>&times;</span>
+      <span class="close" on:click={() => closeHandler()}>&times;</span>
       <slot />
     </div>
   </div>

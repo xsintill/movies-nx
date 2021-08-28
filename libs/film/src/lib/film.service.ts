@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { isNumber } from 'node:util';
+import * as dayjs from 'dayjs';
 import { Sequelize } from 'sequelize-typescript';
 
 import { StartDateNewCounting, TotalFilmsSeenLastCrash } from './film.const';
@@ -82,10 +82,16 @@ export class FilmService {
   }
 
   async add({Title, Url, SeenAt}: DbMovie): Promise<[unknown[], unknown]> {
-    console.log('service add')
     return await this.con.query(
       `INSERT INTO [Film2].[dbo].[Films] (Title, Url, SeenAt)
-      VALUES ('${this.escape(Title)}', '${this.escape(Url)}', '${this.escape(new Date(SeenAt).toISOString().slice(0, 10))}')`);
+      VALUES ('${this.escape(Title)}', '${this.escape(Url)}', '${this.escape(dayjs(SeenAt).format('YYYY-MM-DD HH:mm:ss'))}')`);
+  }
+
+  async update({Id, Title, Url, SeenAt}: DbMovie): Promise<[unknown[], unknown]> {
+    return await this.con.query(
+      `UPDATE [Film2].[dbo].[Films] `+ 
+      `SET Title='${this.escape(Title)}', Url='${this.escape(Url)}', SeenAt='${this.escape(dayjs(SeenAt).format('YYYY-MM-DD HH:mm:ss'))}' `+
+      `WHERE Id = ${Id} `);
   }
 
   async remove(id: number): Promise<[unknown[], unknown]> {

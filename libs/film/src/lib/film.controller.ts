@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Body, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Query, Body, Delete, Param } from '@nestjs/common';
 
 import { FilmService } from './film.service';
 import { DbMovie } from './film.type';
@@ -28,6 +28,10 @@ export class filmController {
   @Post('add')
   async add(@Body() movie: DbMovie){
     return await this.filmService.add(movie);
+  }
+  @Put('update')
+  async update(@Body() movie: DbMovie){
+    return await this.filmService.update(movie);
   }
 
   @Delete('remove/:id')

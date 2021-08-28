@@ -8,14 +8,18 @@
   import type { TMDBMovie } from '../tmdb/TMDB.type';
   import { TMDBPosterSize } from '../tmdb/TMDB.const';
 
+  let now = new Date();
+  now.setHours(now.getHours() + 4)
   const defaultMovie: DbMovie = {
       Id: -1,
       Title: undefined,
       Url: undefined,
-      SeenAt: new Date().toISOString().substr(0, 10),
+      SeenAt: now.toISOString().slice(0,19),
       Genres: undefined,
   };
   export let movie: DbMovie = defaultMovie;
+  //datetime-local accepts a very specific format
+  movie.SeenAt = new Date(movie.SeenAt).toISOString().slice(0,19)
   let posterPath: string;
   let tmdbMovie: TMDBMovie;
 
@@ -42,7 +46,7 @@
           <Input ref="movie-form-controls" label="Title" bind:value={movie.Title} on:blur={()=>onTitleBlur()}/>
           <Input ref="movie-form-controls" label="Url" bind:value={movie.Url} />
           <div ref="movie-form-date-controls">
-            <Input ref="movie-form-controls" type="date" bind:value={movie.SeenAt} />
+            <Input ref="movie-form-controls" type="datetime-local" bind:value={movie.SeenAt} />
             <IconButton ref="movie-form-history" on:click={() => setSeenAtToReleaseYear()} iconName="go-back-in-history" viewBox="0 0 48 48"/>
          </div>
       <!-- </section> -->

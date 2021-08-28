@@ -15,8 +15,9 @@
     getVideos(tmdbId).then(results=> videos = [...results]);
   }
 
-  function trailerClick(key, site) {
+  function trailerClick(key, site, e) {    
     let url: string;
+    e.stopPropagation();
     if (site === 'YouTube') {
       url = `https://www.youtube.com/watch?v=${key}`;
     } else if (site === 'vimeo') {
@@ -27,7 +28,7 @@
 </script>
 
 {#each videos as {key, site, type}}
-<Button class="trailer-button" on:click={()=>trailerClick(key, site)}>{type}</Button>
+<Button class="trailer-button" on:click={(e)=>trailerClick(key, site, e)}>{type}</Button>
 {/each}
 
 <style lang="scss">

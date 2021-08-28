@@ -22,6 +22,7 @@
   import { Year } from './Year/index';
   import { get } from '../axios/get';
   import { post } from '../axios/post';
+  import { put } from '../axios/put';
   import { remove } from '../axios/remove';
   import { latestMovies, tmdbMovies } from '../movie/movie.store';
   import { getIMDBNumber } from './IMDB.utils';
@@ -38,6 +39,8 @@
   let numberOfMoviesSeenAfterCrash: number;
   let numberOfMoviesToAddUntilCompletion: number;
   let selectedMovie: Movie;
+  $: editMode = movie?.Id >= 0;
+  $: upsertDialogTitle = (editMode) ? `Edit movie '${movie?.Title}'` : 'Add new movie';
 
   function refresh(pageIndex: number) {
     let movies: Movie[] = [];
@@ -98,22 +101,35 @@
 
   refresh(0);
 
+  function editMovie(film: Movie){
+    movie = {...film};
+    dialog.show();
+  }
+
   function newClickHandler() {
     dialog.show();
   } 
 
-  function showDeleteConfirmationDialog(tmdbMovie: Movie) {
-    console.log(tmdbMovie)
+  function showDeleteConfirmationDialog(tmdbMovie: Movie, e) {
+    e.stopPropagation();
     selectedMovie = tmdbMovie;
     deleteConfirmationDialog.show();
   } 
 
-  async function saveClickHandler() {
+  async function saveClickHandler() {   
+    console.log('editMode',editMode)  
     //TODO:add validation before adding movie
-    post(`api/film/add`, movie).then(()=>{
-      dialog.hide();
-      refresh(0);
-    });
+    if (editMode) {
+      put(`api/film/update`, movie).then(()=>{
+        dialog.hide();
+        refresh(0);
+      }).finally(()=>movie = undefined);
+    } else {
+      post(`api/film/add`, movie).then(()=>{
+        dialog.hide();
+        refresh(0);
+      }).finally(()=>movie = undefined);
+    }
   } 
 
   async function deleteClickHandler() {
@@ -121,7 +137,15 @@
     remove(`api/film/remove/${selectedMovie.Id}`).then(()=>{
       deleteConfirmationDialog.hide();
       refresh(0);
-    });
+    }).finally(()=>selectedMovie = undefined);
+  }
+  async function cancelClickHandler() {
+    selectedMovie = undefined;
+    deleteConfirmationDialog.hide();
+  }
+  async function cancelUpsertClickHandler() {
+    movie = undefined;
+    dialog.hide();
   }
 </script>
 
@@ -144,27 +168,28 @@
       No movies found searching {$searchTerm}
     {:else}
       {#each $tmdbMovies as movie}
-        <MovieRow>
+        <MovieRow on:click={()=>editMovie(movie)}>
           <MovieTitle>{movie?.Title}</MovieTitle>(<Year date={movie?.tmdbMovie?.release_date} />)
           <MovieSeenAt date={movie?.SeenAt}></MovieSeenAt>    
           <Poster url={movie?.Url} src={movie?.tmdbMovie?.poster_path} alt={`Poster for movie '${movie?.Title}'`} />   
           <MovieRating rate={movie?.tmdbMovie?.vote_average} /> 
           <WordCount wordCount={movie?.wordCount} />
           
-          <Videos tmdbId={movie?.tmdbMovie?.id}/>
+          <Videos  tmdbId={movie?.tmdbMovie?.id}/>
           <MovieDescription description={movie?.tmdbMovie?.overview} />
-          <IconButton iconName="bin" on:click={()=>showDeleteConfirmationDialog(movie)}/>
+          <IconButton iconName="bin" on:click={(e)=>showDeleteConfirmationDialog(movie,e)}/>
         </MovieRow>      
       {/each}
     {/if} 
-    <Dialog bind:this={dialog}>
-      <h2>Add new movie</h2>
-      <MovieForm bind:movie={movie}/>
+    <Dialog bind:this={dialog} onclose={cancelUpsertClickHandler}>
+      <h2>{upsertDialogTitle}</h2>
+      <MovieForm bind:movie={movie} />
+      <Button on:click={() => cancelUpsertClickHandler()}>Cancel</Button>
       <Button on:click={() => saveClickHandler()}>Save</Button>
     </Dialog>
     <Dialog bind:this={deleteConfirmationDialog}>
       <h2>Are you sure you want to delete <span class="movie-title">'{selectedMovie?.Title}'</span>?</h2>
-      <Button on:click={() => deleteConfirmationDialog.hide()}>Cancel</Button>
+      <Button on:click={() => cancelClickHandler()}>Cancel</Button>
       <Button on:click={() => deleteClickHandler()}>Delete</Button>
     </Dialog>
   </div>
