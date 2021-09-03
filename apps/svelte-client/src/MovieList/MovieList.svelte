@@ -63,19 +63,20 @@
       if (res.length !== 0) {
         const internalTmdbMovies: Movie[] = [];
         let i: number = 0;
-        movies = res.map(item => {  
+        movies = res.map((item, index) => {  
           const imdbNumber = getIMDBNumber(item?.Url);
           if (!imdbNumber) return {...item};
           tmdbMovies.update(t=>{
             getMovieByImdbId(imdbNumber).then((tmdb) => {
-              internalTmdbMovies.push({
+              internalTmdbMovies[index] = {
                 ...item,
                 imdbNumber,
                 tmdbMovie: tmdb,
-              });
+              };
               i++;
               if (i >= internalTmdbMovies.length) {
                 tmdbMovies.set(internalTmdbMovies);
+                console.log('internalTmdbMovies', internalTmdbMovies)
               }
             });
             return [...t]
@@ -123,12 +124,12 @@
       put(`api/film/update`, movie).then(()=>{
         dialog.hide();
         refresh(0);
-      }).finally(()=>movie = undefined);
+      })//.finally(()=>movie = undefined);
     } else {
       post(`api/film/add`, movie).then(()=>{
         dialog.hide();
         refresh(0);
-      }).finally(()=>movie = undefined);
+      })//.finally(()=>movie = undefined);
     }
   } 
 
@@ -137,7 +138,7 @@
     remove(`api/film/remove/${selectedMovie.Id}`).then(()=>{
       deleteConfirmationDialog.hide();
       refresh(0);
-    }).finally(()=>selectedMovie = undefined);
+    })//.finally(()=>selectedMovie = undefined);
   }
   async function cancelClickHandler() {
     selectedMovie = undefined;
@@ -187,7 +188,7 @@
       <Button on:click={() => cancelUpsertClickHandler()}>Cancel</Button>
       <Button on:click={() => saveClickHandler()}>Save</Button>
     </Dialog>
-    <Dialog bind:this={deleteConfirmationDialog}>
+    <Dialog bind:this={deleteConfirmationDialog} onclose={()=>console.log(undefined)}>
       <h2>Are you sure you want to delete <span class="movie-title">'{selectedMovie?.Title}'</span>?</h2>
       <Button on:click={() => cancelClickHandler()}>Cancel</Button>
       <Button on:click={() => deleteClickHandler()}>Delete</Button>
