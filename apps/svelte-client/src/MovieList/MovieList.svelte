@@ -76,7 +76,6 @@
               i++;
               if (i >= internalTmdbMovies.length) {
                 tmdbMovies.set(internalTmdbMovies);
-                console.log('internalTmdbMovies', internalTmdbMovies)
               }
             });
             return [...t]
@@ -124,13 +123,14 @@
       put(`api/film/update`, movie).then(()=>{
         dialog.hide();
         refresh(0);
-      })//.finally(()=>movie = undefined);
+      })
     } else {
       post(`api/film/add`, movie).then(()=>{
         dialog.hide();
         refresh(0);
-      })//.finally(()=>movie = undefined);
+      })
     }
+    movie = undefined;
   } 
 
   async function deleteClickHandler() {
@@ -138,7 +138,8 @@
     remove(`api/film/remove/${selectedMovie.Id}`).then(()=>{
       deleteConfirmationDialog.hide();
       refresh(0);
-    })//.finally(()=>selectedMovie = undefined);
+    });
+    selectedMovie = undefined;
   }
   async function cancelClickHandler() {
     selectedMovie = undefined;
