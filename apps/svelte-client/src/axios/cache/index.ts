@@ -1,0 +1,1 @@
+export { getCache, invalidateGetCache } from './cache'

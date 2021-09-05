@@ -1,7 +1,6 @@
 import { apiRequest } from './apiRequest';
 
-export function put(url: string, payload: unknown = {}): Promise<void> {
-    console.log('put method')
+export function put(url: string, payload: object = {}): Promise<void> {
     return apiRequest('put', url, payload);
 }
   
