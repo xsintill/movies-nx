@@ -1,6 +1,7 @@
 <script lang="ts">
   // import List, { Item, Graphic, Text } from '@smui/list';
   import {debounce} from 'lodash';
+  import type { CancelTokenSource } from 'axios';
 
   import MovieForm from '../MovieForm/MovieForm.svelte';
   import MovieTitle from './MovieTitle/MovieTitle.svelte';
@@ -28,6 +29,7 @@
   import { getIMDBNumber } from './IMDB.utils';
   import { getMovieByImdbId } from '../tmdb/TMDB.utils';
   import type { DbMovie, Movie, PagedMovie } from '../movie/movie.type';
+  import { getCancelToken } from '../axios/getCancelToken';
 	
 	let error;
   let dialog: Dialog;
@@ -42,9 +44,19 @@
   $: editMode = movie?.Id >= 0;
   $: upsertDialogTitle = (editMode) ? `Edit movie '${movie?.Title}'` : 'Add new movie';
 
+  let cancelToken: CancelTokenSource;
   function refresh(pageIndex: number) {
     let movies: Movie[] = [];
-    get<PagedMovie>(`api/film/latest?search=${$searchTerm}&pageIndex=${pageIndex}`).then(({
+    if (cancelToken !== undefined) {
+      console.log('cancelling')
+       cancelToken.cancel("Operation canceled due to new request.");
+    }
+    cancelToken = getCancelToken();
+    get<PagedMovie>(
+      `api/film/latest?search=${$searchTerm}&pageIndex=${pageIndex}`,
+      undefined,
+      cancelToken.token
+      ).then(({
       results:res, 
       pageIndex,
       pageSize,
@@ -60,10 +72,10 @@
       numberOfMoviesTotal = totalCount;
       numberOfMoviesSearched =searchCount;
       
-      if (res.length !== 0) {
+      if (res?.length !== 0) {
         const internalTmdbMovies: Movie[] = [];
         let i: number = 0;
-        movies = res.map((item, index) => {  
+        movies = res?.map((item, index) => {  
           const imdbNumber = getIMDBNumber(item?.Url);
           if (!imdbNumber) return {...item};
           tmdbMovies.update(t=>{
@@ -87,8 +99,8 @@
         });
       } 
       latestMovies.set(movies);
-      movies.length === 0 && tmdbMovies.set([]);
-      if (movies.length === 0) {
+      movies?.length === 0 && tmdbMovies.set([]);
+      if (movies?.length === 0) {
         numberOfMoviesSearched = 0;
       }
     });
@@ -128,9 +140,9 @@
       post(`api/film/add`, movie).then(()=>{
         dialog.hide();
         refresh(0);
-      })
+        movie = undefined;
+      });
     }
-    movie = undefined;
   } 
 
   async function deleteClickHandler() {
@@ -138,8 +150,8 @@
     remove(`api/film/remove/${selectedMovie.Id}`).then(()=>{
       deleteConfirmationDialog.hide();
       refresh(0);
+      selectedMovie = undefined;
     });
-    selectedMovie = undefined;
   }
   async function cancelClickHandler() {
     selectedMovie = undefined;
