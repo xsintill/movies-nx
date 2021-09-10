@@ -1,7 +1,7 @@
 import axios from 'axios/dist/axios';
 
 import type { AxiosRequestConfig, AxiosStatic } from 'axios';
-import { getCache, invalidateGetCache } from './cache';
+import { getCache, invalidateGetCache, invalidateStaleGetCacheData, writeToCache } from './cache';
 
 export const ax: AxiosStatic = axios.create();
 
@@ -32,17 +32,21 @@ ax.interceptors.response.use(
         if (res.config.method === 'get') {
             const index = getCache.findIndex((item) => item.url === res.config.url);
             if (index === -1) {
-                const now = new Date()
-                now.setHours(now.getHours() + 4)
-                getCache.push({
+                const invalidAfterDate = new Date();
+                invalidAfterDate.setHours(invalidAfterDate.getHours() + 4);
+                writeToCache({
                     url: res.config.url,
                     response: res,
-                    invalidAfter: now
-                });
+                    invalidAfter: invalidAfterDate
+                })
+                
+                invalidateStaleGetCacheData();
                 return res;
             }
+            invalidateStaleGetCacheData();
             return res;
         }
+        invalidateStaleGetCacheData();
         return res;
     },
     (error) => {
