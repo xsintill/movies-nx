@@ -25,6 +25,17 @@ export class FilmService {
       `Title LIKE '${word}'`);
     return { word: search, count: results[0]["count"], metadata };
   }
+  
+  async getFilmsForWord(search: string): Promise<{ word: string, films: unknown[], metadata: unknown }> {
+    const word = this.escape(search);
+    const [results, metadata] = await this.con.query(
+      `SELECT Title FROM [FILM2].[DBO].[FILMS]` +
+      `WHERE Title LIKE '%[^a-Z0-9]${word}[^a-Z0-9]%' OR ` +
+      `Title LIKE '${word}[^a-Z0-9]%' OR `+
+      `Title LIKE '%[^a-Z0-9]${word}' OR `+
+      `Title LIKE '${word}'`);
+    return { word: search, films: results, metadata };
+  }
 
   async getLatest(search: string = '', pageIndex: number = 0, pageSize: number = 10): Promise<PagedMovie> {
     let searchCount: number;

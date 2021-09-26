@@ -17,6 +17,11 @@ export class filmController {
     return await this.filmService.getWordCount(word);
   }
   
+  @Get('getFilmsForWord')
+  async getFilmsForWord(@Query('word') word: string) {
+    return await this.filmService.getFilmsForWord(word);
+  }
+  
   @Get('latest')
   async getLatest(
     @Query('search') search: string = '', 
@@ -29,6 +34,7 @@ export class filmController {
   async add(@Body() movie: DbMovie){
     return await this.filmService.add(movie);
   }
+  
   @Put('update')
   async update(@Body() movie: DbMovie){
     return await this.filmService.update(movie);
