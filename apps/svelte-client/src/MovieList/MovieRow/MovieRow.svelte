@@ -1,11 +1,6 @@
 <script lang="ts">
-  // function clickHandler(url: string) {
-  //   window.open(url);   
-  // }
-  export let url: string;
 </script>
 
-<!-- on:click={()=>clickHandler(url)} -->
 <div on:click>
   <slot />
 </div>
