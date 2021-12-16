@@ -2,9 +2,8 @@ import type { GetCacheItem } from "./cache.type";
 
 export let getCache: GetCacheItem[] = [];
 
-initGetCache();
-
 export function invalidateGetCache(urlStartsWith?: string): void {
+    if (urlStartsWith) console.log('invalidate for:', urlStartsWith)
     const prevLength = getCache.length;
     getCache = [...getCache.filter((item) => !item.url.startsWith(urlStartsWith))];
     const postLength = getCache.length;
@@ -24,6 +23,7 @@ export function writeToCache(item: GetCacheItem): void {
     window.localStorage.setItem('getCache',JSON.stringify(getCache));
 }
 
-export function initGetCache(): void {
-    getCache = JSON.parse(window.localStorage.getItem('getCache'))
+export function initGetCache(callback:Function): void {    
+    getCache = JSON.parse(window.localStorage.getItem('getCache'));
+    callback();
 }
