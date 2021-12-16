@@ -123,6 +123,7 @@
         "serve": {
           "executor": "@nxext/svelte:build",
           "options": {
+            "open": true,
             "outputPath": "dist/apps/svelte-client",
             "entryFile": "apps/svelte-client/src/main.ts",
             "tsConfig": "apps/svelte-client/tsconfig.app.json",

@@ -3,6 +3,7 @@
   import {debounce} from 'lodash';
   import type { CancelTokenSource } from 'axios';
 
+  import LetterComboTile from './LetterComboTile/LetterComboTile.svelte';
   import MovieForm from '../MovieForm/MovieForm.svelte';
   import MovieTitle from './MovieTitle/MovieTitle.svelte';
   import MovieSeenAt from './MovieSeenAt/MovieSeenAt.svelte';
@@ -25,7 +26,7 @@
   import { post } from '../axios/post';
   import { put } from '../axios/put';
   import { remove } from '../axios/remove';
-  import { latestMovies, tmdbMovies } from '../movie/movie.store';
+  import { latestMovies, tmdbMovies, letterCombos } from '../movie/movie.store';
   import { getIMDBNumber } from './IMDB.utils';
   import { getMovieByImdbId } from '../tmdb/TMDB.utils';
   import type { DbMovie, Movie, PagedMovie } from '../movie/movie.type';
@@ -34,6 +35,7 @@
 	let error;
   let dialog: Dialog;
   let deleteConfirmationDialog: Dialog;
+  let letterComboDialog: Dialog;
   let movie: DbMovie;
   let numberOfMoviesSearched: number;
   let numberOfMoviesInDB: number;
@@ -41,19 +43,72 @@
   let numberOfMoviesSeenAfterCrash: number;
   let numberOfMoviesToAddUntilCompletion: number;
   let selectedMovie: Movie;
+  let prevSearchTerm = '';
+  let currentPageIndex = 0;
   $: editMode = movie?.Id >= 0;
   $: upsertDialogTitle = (editMode) ? `Edit movie '${movie?.Title}'` : 'Add new movie';
 
+   const load = () => {
+    // setTimeout(() => {
+      // currentPageIndex = currentPageIndex + 1;
+      refresh();
+    // }, 300); // WE WAITED A FEW SECONDS
+  };
+
+  // REACTIVE DECLARATIONS
+  let elementRef = null;
+  $: {
+    if (elementRef) {
+      infiniteScroll({ fetch: load, element: elementRef });
+    }
+  }
   let cancelToken: CancelTokenSource;
-  function refresh(pageIndex: number) {
+
+export const infiniteScroll = ({ fetch, element }) => {
+  if (element) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting) {
+          console.log("Is Intersecting");
+          fetch();
+        }
+      },
+      { threshold: 1 }
+    );
+    observer.observe(element);
+  }
+};
+
+function getAllLetterComboFromBackend() {
+  return get<string[]>('/api/film/getAllOcurring2and3LetterCombos',
+    undefined,
+    cancelToken.token
+  ).then((res)=>{
+    console.log(res);
+    letterCombos.set(res);
+    return res;
+  }).catch((err)=>{
+    console.log(err);
+  });
+}
+
+
+
+  function refresh() {
+    console.log('refresh')
     let movies: Movie[] = [];
+    let searchTermHasChanged = prevSearchTerm !== $searchTerm
+    if (prevSearchTerm !== $searchTerm) {currentPageIndex = 0} 
+    prevSearchTerm = $searchTerm;
+    // currentPageIndex = pageIndex;
     if (cancelToken !== undefined) {
       console.log('cancelling')
        cancelToken.cancel("Operation canceled due to new request.");
     }
     cancelToken = getCancelToken();
     get<PagedMovie>(
-      `api/film/latest?search=${$searchTerm}&pageIndex=${pageIndex}`,
+      `api/film/latest?search=${$searchTerm}&pageIndex=${currentPageIndex}`,
       undefined,
       cancelToken.token
       ).then(({
@@ -66,7 +121,7 @@
       totalCount,
       searchCount,
       pageCount}: PagedMovie) => {	
-      numberOfMoviesToAddUntilCompletion =  filmsToAddUntilCompletion;
+      numberOfMoviesToAddUntilCompletion = filmsToAddUntilCompletion;
       numberOfMoviesSeenAfterCrash = seenAfterCrashCount;
       numberOfMoviesInDB = totalDbCount;
       numberOfMoviesTotal = totalCount;
@@ -87,7 +142,7 @@
               };
               i++;
               if (i >= internalTmdbMovies.length) {
-                tmdbMovies.set(internalTmdbMovies);
+                searchTermHasChanged ? tmdbMovies.set([...internalTmdbMovies]) : tmdbMovies.set([...t,...internalTmdbMovies]);                
               }
             });
             return [...t]
@@ -108,18 +163,24 @@
 
   const searchValueChangeHandler = debounce((event) => {
     searchTerm.set(event.target.value);
-    refresh(0);
+    refresh();
   },300);
 
-  refresh(0);
+  refresh();
 
-  function editMovie(film: Movie){
+  function editMovie(film: Movie, e){
+    e.stopPropagation();
     movie = {...film};
     dialog.show();
   }
 
   function newClickHandler() {
     dialog.show();
+  } 
+  function showLetterComboDialogHandler() {
+    //getAllLetterComboFromBackend().then((res)=>{
+      letterComboDialog.show();
+    //});
   } 
 
   function showDeleteConfirmationDialog(tmdbMovie: Movie, e) {
@@ -134,23 +195,23 @@
     if (editMode) {
       put(`api/film/update`, movie).then(()=>{
         dialog.hide();
-        refresh(0);
+        movie = undefined;
+        refresh();
       })
     } else {
       post(`api/film/add`, movie).then(()=>{
         dialog.hide();
-        refresh(0);
         movie = undefined;
+        refresh();
       });
     }
   } 
 
   async function deleteClickHandler() {
-    console.log('delete confirmed clicked');
     remove(`api/film/remove/${selectedMovie.Id}`).then(()=>{
       deleteConfirmationDialog.hide();
-      refresh(0);
       selectedMovie = undefined;
+      refresh();
     });
   }
   async function cancelClickHandler() {
@@ -160,6 +221,13 @@
   async function cancelUpsertClickHandler() {
     movie = undefined;
     dialog.hide();
+  }
+  async function closeLetterComboDialogHandler() {
+    letterComboDialog.hide();
+  }
+  async function loadMoreHandler() {
+    currentPageIndex = currentPageIndex+1;
+    refresh();   
   }
 </script>
 
@@ -171,6 +239,8 @@
   <div>
     <Search on:input={searchValueChangeHandler} label={'Search'}/> 
     <IconButton iconName={'add'} viewBox={'0 -2 24 24'} on:click={()=>newClickHandler()}/> 
+    <Button on:click={()=>showLetterComboDialogHandler()}>Letter Combos</Button> 
+    <LetterComboTile letterCombo="A"/>
     <Statistics 
       searchedCount={numberOfMoviesSearched} 
       inDBCount={numberOfMoviesInDB} 
@@ -182,18 +252,18 @@
       No movies found searching {$searchTerm}
     {:else}
       {#each $tmdbMovies as movie}
-        <MovieRow on:click={()=>editMovie(movie)}>
+        <MovieRow on:click={(e)=>editMovie(movie, e)}>
           <MovieTitle>{movie?.Title}</MovieTitle>(<Year date={movie?.tmdbMovie?.release_date} />)
           <MovieSeenAt date={movie?.SeenAt}></MovieSeenAt>    
           <Poster url={movie?.Url} src={movie?.tmdbMovie?.poster_path} alt={`Poster for movie '${movie?.Title}'`} />   
           <MovieRating rate={movie?.tmdbMovie?.vote_average} /> 
-          <WordCount wordCount={movie?.wordCount} />
-          
-          <Videos  tmdbId={movie?.tmdbMovie?.id}/>
+          <WordCount wordCount={movie?.wordCount} />          
+          <Videos tmdbId={movie?.tmdbMovie?.id}/>
           <MovieDescription description={movie?.tmdbMovie?.overview} />
           <IconButton iconName="bin" on:click={(e)=>showDeleteConfirmationDialog(movie,e)}/>
         </MovieRow>      
       {/each}
+      <Button on:click={()=> loadMoreHandler()}>Load more</Button>
     {/if} 
     <Dialog bind:this={dialog} onclose={cancelUpsertClickHandler}>
       <h2>{upsertDialogTitle}</h2>
@@ -205,6 +275,14 @@
       <h2>Are you sure you want to delete <span class="movie-title">'{selectedMovie?.Title}'</span>?</h2>
       <Button on:click={() => cancelClickHandler()}>Cancel</Button>
       <Button on:click={() => deleteClickHandler()}>Delete</Button>
+    </Dialog>
+    <Dialog bind:this={letterComboDialog} onclose={closeLetterComboDialogHandler}>
+      <h2>Letter Combos</h2>
+      <LetterComboTile letterCombo="A"/>
+      <!-- {#each $letterCombos as letterCombo}
+        <span>{letterCombo}, </span>
+      {/each} -->
+      <Button on:click={(e) => closeLetterComboDialogHandler()}>Ok</Button>
     </Dialog>
   </div>
 {/if}
