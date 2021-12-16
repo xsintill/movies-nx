@@ -7,6 +7,7 @@ export const ax: AxiosStatic = axios.create();
 
 ax.interceptors.request.use(
     (config: AxiosRequestConfig) => {
+        if (getCache === null)  return config
         if (config.method === 'put' ||
             config.method === 'post' || 
             config.method === 'delete' 
@@ -14,7 +15,7 @@ ax.interceptors.request.use(
             invalidateGetCache('api/film');
         }
         if (config.method === 'get') {
-            const index = getCache.findIndex((item) =>item.url === config.url);
+            const index = getCache.findIndex((item) => item.url.trim().toLowerCase() === config.url.trim().toLowerCase());
             if (index !== -1) {
                 const response = getCache[index].response;
                 config.adapter = () => Promise.resolve(response);
@@ -30,6 +31,7 @@ ax.interceptors.request.use(
 ax.interceptors.response.use(
     (res) => {
         if (res.config.method === 'get') {
+            if (!getCache) return res;
             const index = getCache.findIndex((item) => item.url === res.config.url);
             if (index === -1) {
                 const invalidAfterDate = new Date();
