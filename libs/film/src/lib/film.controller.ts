@@ -16,6 +16,11 @@ export class filmController {
   async getWordCount(@Query('word') word: string) {
     return await this.filmService.getWordCount(word);
   }
+
+  @Get('getAllOcurring2and3LetterCombos')
+  async getAllOcurring2and3LetterCombos() {
+    return await this.filmService.getAllOcurring2and3LetterCombos();
+  }
   
   @Get('getFilmsForWord')
   async getFilmsForWord(@Query('word') word: string) {
