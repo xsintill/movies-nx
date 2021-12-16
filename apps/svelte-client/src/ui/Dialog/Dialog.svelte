@@ -24,7 +24,9 @@
 {#if shown}
   <div class="modal-wrapper">
     <div class="modal">
-      <span class="close" on:click={() => closeHandler()}>&times;</span>
+      <span 
+        class="close" 
+        on:click|stopPropagation={() => closeHandler()}>&times;</span>
       <slot />
     </div>
   </div>
