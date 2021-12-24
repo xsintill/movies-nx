@@ -201,7 +201,7 @@ export class FilmService {
       'the',
       'to',
     ];
-    const wordsRegex = new RegExp(`\\b(\\w{2,})'?(\\w{2,})?\\b(?<!\\b[0-9].*\\b|\\b${veryCommonWords.join('\\b|\\b')}\\b)`, 'g');
+    const wordsRegex = new RegExp(`\\b(\\w{2,})'?(\\w{2,})?\\b(?<!\\d|\\b${veryCommonWords.join('\\b|\\b')}\\b)`, 'g');
     //match the words and make unique
     let words = title.match(wordsRegex)
     words = (words) ? words.filter((value: string, index: number, array: string[])=> array.indexOf(value) === index) : [];
