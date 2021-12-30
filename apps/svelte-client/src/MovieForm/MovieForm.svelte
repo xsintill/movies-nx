@@ -41,24 +41,15 @@
   }
 </script>
 
-    <Form ref="movie-form-layout" on:submit={onSubmit}>
-      <!-- <section ref="movie-form-elements"> -->
-          <Input ref="movie-form-controls" label="Title" bind:value={movie.Title} on:blur={()=>onTitleBlur()}/>
-          <Input ref="movie-form-controls" label="Url" bind:value={movie.Url} />
-          <div ref="movie-form-date-controls">
-            <Input ref="movie-form-controls" type="datetime-local" bind:value={movie.SeenAt} />
-            <IconButton ref="movie-form-history" on:click={() => setSeenAtToReleaseYear()} iconName="go-back-in-history" viewBox="0 0 48 48"/>
-         </div>
-      <!-- </section> -->
-      <MoviePoster ref="movie-form-poster" src={posterPath} size={TMDBPosterSize.w342} alt={`movie poster for ${movie.Title}`}/>
-      <!-- {#if posterPath}
-      {:else}
-        <img class="movie-poster" alt=""/>
-      {/if} -->
-      <!-- <SubmitButton label="Save" on:click={() => handleOnSubmit()} /> -->
-    </Form>
-    <!-- {JSON.stringify(posterPath)} -->
-    <!-- {JSON.stringify(movie)} -->
+<Form ref="movie-form-layout" on:submit={onSubmit}>
+  <Input ref="movie-form-controls" label="Title" bind:value={movie.Title} on:blur={()=>onTitleBlur()}/>
+  <Input ref="movie-form-controls" label="Url" bind:value={movie.Url} />
+  <div ref="movie-form-date-controls">
+    <Input ref="movie-form-controls" type="datetime-local" bind:value={movie.SeenAt} />
+    <IconButton ref="movie-form-history" on:click={() => setSeenAtToReleaseYear()} iconName="go-back-in-history" viewBox="0 0 48 48"/>
+  </div>
+  <MoviePoster url={movie.Url} ref="movie-form-poster" src={posterPath} size={TMDBPosterSize.w342} alt={`movie poster for ${movie.Title}`}/>
+</Form>
 
 <style lang="scss">
     :global([ref=movie-form-layout]) {
