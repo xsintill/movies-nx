@@ -42,10 +42,10 @@
 </script>
 
 <Form ref="movie-form-layout" on:submit={onSubmit}>
-  <Input ref="movie-form-controls" label="Title" bind:value={movie.Title} on:blur={()=>onTitleBlur()}/>
-  <Input ref="movie-form-controls" label="Url" bind:value={movie.Url} />
-  <div ref="movie-form-date-controls">
-    <Input ref="movie-form-controls" type="datetime-local" bind:value={movie.SeenAt} />
+  <Input id="movieTitle" ref="movie-form-controls" label="Title" bind:value={movie.Title} on:blur={()=>onTitleBlur()}/>
+  <Input id="movieUrl"ref="movie-form-controls" label="Url" bind:value={movie.Url} />
+  <div>
+    <Input id="movieSeenAt" ref="movie-form-controls" label="Seen At" type="datetime-local" bind:value={movie.SeenAt} />
     <IconButton ref="movie-form-history" on:click={() => setSeenAtToReleaseYear()} iconName="go-back-in-history" viewBox="0 0 48 48"/>
   </div>
   <MoviePoster url={movie.Url} ref="movie-form-poster" src={posterPath} size={TMDBPosterSize.w342} alt={`movie poster for ${movie.Title}`}/>
