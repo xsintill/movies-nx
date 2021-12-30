@@ -249,7 +249,7 @@ function getAllLetterComboFromBackend() {
       seenAfterCrashCount={numberOfMoviesSeenAfterCrash} 
     />
     {#if $tmdbMovies.length === 0}
-      No movies found searching {$searchTerm}
+      No movies found searching "{$searchTerm}"
     {:else}
       {#each $tmdbMovies as movie}
         <MovieRow on:click={(e)=>editMovie(movie, e)}>
