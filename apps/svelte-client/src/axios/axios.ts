@@ -5,13 +5,19 @@ import { getCache, invalidateGetCache, invalidateStaleGetCacheData, writeToCache
 
 export const ax: AxiosStatic = axios.create();
 
+function logIf(config: AxiosRequestConfig, message: string): void {
+ (config.url ==='api/film/latest?search=&pageIndex=0') ?
+     console.log(`intercepter: ${message}`):
+     undefined;
+}
+
 ax.interceptors.request.use(
     (config: AxiosRequestConfig) => {
-        if (getCache === null)  return config
+        if (getCache === null || getCache.length === 0)  return config
         if (config.method === 'put' ||
-            config.method === 'post' || 
-            config.method === 'delete' 
-            ) {
+        config.method === 'post' || 
+        config.method === 'delete' 
+        ) {
             invalidateGetCache('api/film');
         }
         if (config.method === 'get') {
