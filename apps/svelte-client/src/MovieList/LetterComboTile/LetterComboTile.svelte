@@ -22,7 +22,6 @@
   <!-- {/if} -->
 </div>
 {/if}
-Z
 <style lang="scss">
   //wrapper class show itç children in a row using flexbox
   .row {
